@@ -1,33 +1,43 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 )
 
 func main() {
-	problemsFile := "problems.csv"
-	var userInput string
-	var score uint = 0
+	// problemsFile := "problems.csv"
+	filePtr := flag.String("filename", "problems.csv", "File name of the question/answer file in CSV format")
+	flag.Parse()
+	problemsFile := *filePtr
 
 	csvFile := readFile(problemsFile)
 
 	questions := getQuestions(csvFile)
 
-	printIntro(len(questions))
+	numQuestions := len(questions)
+	printIntro(numQuestions)
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
+	score := runGame(questions)
+	fmt.Printf("You scored %v our of %v!\n", score, numQuestions)
 
+}
+
+func runGame(questions [][]string) uint {
+	var score uint = 0
+	var userAnswer string
 	for _, qaPair := range questions {
 		fmt.Println(qaPair[0])
-		fmt.Scan(&userInput)
-		if qaPair[1] == userInput {
+		fmt.Scan(&userAnswer)
+		if qaPair[1] == userAnswer {
 			score += 1
 		}
 	}
-
-	fmt.Printf("You scored %v!", score)
-
+	return score
 }
 
 func check(e error) {
@@ -56,5 +66,5 @@ func printIntro(numQuestions int) {
 	fmt.Println("===========================================")
 	fmt.Println("")
 	fmt.Printf("You will be asked %v questions, then your score will be revealed at the end\n", numQuestions)
-	fmt.Println("Press any key to start")
+	fmt.Println("Press enter to start")
 }
