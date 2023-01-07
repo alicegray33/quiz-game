@@ -9,12 +9,24 @@ import (
 
 func main() {
 	problemsFile := "problems.csv"
+	var userInput string
+	var score uint = 0
 
 	csvFile := readFile(problemsFile)
 
 	questions := getQuestions(csvFile)
 
-	fmt.Print(questions)
+	printIntro(len(questions))
+
+	for _, qaPair := range questions {
+		fmt.Println(qaPair[0])
+		fmt.Scan(&userInput)
+		if qaPair[1] == userInput {
+			score += 1
+		}
+	}
+
+	fmt.Printf("You scored %v!", score)
 
 }
 
@@ -37,4 +49,12 @@ func getQuestions(problemsFile string) [][]string {
 	check(err)
 
 	return questions
+}
+
+func printIntro(numQuestions int) {
+	fmt.Println("Welcome to the super-exciting quiz program!")
+	fmt.Println("===========================================")
+	fmt.Println("")
+	fmt.Printf("You will be asked %v questions, then your score will be revealed at the end\n", numQuestions)
+	fmt.Println("Press any key to start")
 }
