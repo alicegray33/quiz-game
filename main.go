@@ -7,27 +7,49 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
+	"time"
 )
+
+var score uint = 0
+var timeUp bool = false
+var wg sync.WaitGroup
 
 func main() {
 	filePtr := flag.String("filename", "problems.csv", "File name of the question/answer file in CSV format")
+	timerPtr := flag.Int("timer", 30, "Time limit to complete the quiz")
 	flag.Parse()
 	problemsFile := *filePtr
+	gameTime := *timerPtr
 
 	csvFile := readFile(problemsFile)
 
 	questions := getQuestions(csvFile)
 
 	numQuestions := len(questions)
-	printIntro(numQuestions)
+	printIntro(numQuestions, gameTime)
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
-	score := runGame(questions)
+
+	wg.Add(1)
+	go runGame(questions)
+	go startTimer(gameTime)
+	wg.Wait()
+
+	if timeUp {
+		fmt.Println("Times up!")
+	}
 	fmt.Printf("You scored %v our of %v!\n", score, numQuestions)
 
 }
 
-func runGame(questions [][]string) uint {
-	var score uint = 0
+func startTimer(gameTime int) {
+	defer wg.Done()
+	time.Sleep(time.Duration(gameTime) * time.Second)
+	timeUp = true
+}
+
+func runGame(questions [][]string) {
+	defer wg.Done()
 	var userAnswer string
 	for _, qaPair := range questions {
 		fmt.Println(qaPair[0])
@@ -36,7 +58,6 @@ func runGame(questions [][]string) uint {
 			score += 1
 		}
 	}
-	return score
 }
 
 func check(e error) {
@@ -60,10 +81,10 @@ func getQuestions(problemsFile string) [][]string {
 	return questions
 }
 
-func printIntro(numQuestions int) {
+func printIntro(numQuestions, gameTime int) {
 	fmt.Println("Welcome to the super-exciting quiz program!")
 	fmt.Println("===========================================")
 	fmt.Println("")
-	fmt.Printf("You will be asked %v questions, then your score will be revealed at the end\n", numQuestions)
+	fmt.Printf("You must answer %v questions in %v seconds, then your score will be revealed at the end\n", numQuestions, gameTime)
 	fmt.Println("Press enter to start")
 }
