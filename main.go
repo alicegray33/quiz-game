@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	// problemsFile := "problems.csv"
 	filePtr := flag.String("filename", "problems.csv", "File name of the question/answer file in CSV format")
 	flag.Parse()
 	problemsFile := *filePtr
