@@ -32,7 +32,7 @@ func runGame(questions [][]string) uint {
 	for _, qaPair := range questions {
 		fmt.Println(qaPair[0])
 		fmt.Scan(&userAnswer)
-		if qaPair[1] == userAnswer {
+		if strings.EqualFold(qaPair[1], userAnswer) {
 			score += 1
 		}
 	}
