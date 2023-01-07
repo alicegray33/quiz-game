@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"sync"
@@ -18,15 +19,24 @@ var wg sync.WaitGroup
 func main() {
 	filePtr := flag.String("filename", "problems.csv", "File name of the question/answer file in CSV format")
 	timerPtr := flag.Int("timer", 30, "Time limit to complete the quiz")
+	randomFlatPTR := flag.Bool("random", false, "Boolean value on whether to randomize the questions")
 	flag.Parse()
 	problemsFile := *filePtr
 	gameTime := *timerPtr
+	randomize := *randomFlatPTR
 
 	csvFile := readFile(problemsFile)
 
 	questions := getQuestions(csvFile)
-
 	numQuestions := len(questions)
+
+	if randomize {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(numQuestions, func(i, j int) {
+			questions[i], questions[j] = questions[j], questions[i]
+		})
+	}
+
 	printIntro(numQuestions, gameTime)
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 
